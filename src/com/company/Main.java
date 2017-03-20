@@ -1,34 +1,48 @@
 package com.company;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by ToubeauShawnD on 3/16/2017.
  */
 public class Main extends Application{
 
+    private TextField textField = new TextField();
+
     @Override
     public void start(Stage primarystage) throws Exception {
-        GridPane grid = new GridPane();
-        //
-        Scene scene = new Scene(grid, 500, 500);
+        List<String> buttons = Arrays.asList("7","8","9","DEL","CLEAR","4","5","6","^","Sqrt","1","2","3","+","-",".","0","=","X","/");
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 5; j++) {
-                Button btn = new Button();
-                btn.setText("yes");
-                btn.setMaxWidth(20);
-                btn.setMaxHeight(10);
+        FlowPane pane = new FlowPane();
+        pane.setAlignment(Pos.CENTER);
+        pane.setPadding(new Insets(30,20,30,20));
+        pane.setHgap(5);
+        pane.setVgap(5);
 
-                GridPane.setRowIndex(btn, i);
-                GridPane.setColumnIndex(btn, j);
-                grid.getChildren().add(new Button("YES"));
-            }
+        textField.setEditable(false);
+        textField.setAlignment(Pos.CENTER);
+        textField.setMinSize(420, 40);
+
+        pane.getChildren().add(textField);
+
+        for (String button: buttons) {
+            Button b = new Button(button);
+            b.setMinSize(80,80);
+            pane.getChildren().add(b);
+            //b.setOnAction(e -> doSomething(b.getText()));
         }
+
+        Scene scene = new Scene(pane,536,500);
         primarystage.setScene(scene);
         primarystage.show();
     }
