@@ -18,9 +18,9 @@ import java.util.List;
 public class Main extends Application{
 
     private TextField textField = new TextField();
-    static ArrayList<Integer> nums = new ArrayList<Integer>(); //individual button presses
-    static ArrayList<Double> fullNums = new ArrayList<Double>(); //after user input is put together
-    static ArrayList<String> operations = new ArrayList<String>();//operations
+    private ArrayList<Integer> nums = new ArrayList<Integer>(); //individual button presses
+    private ArrayList<Double> fullNums = new ArrayList<Double>(); //after user input is put together
+    private ArrayList<String> operations = new ArrayList<String>();//operations
 
     @Override
     public void start(Stage primarystage) throws Exception {
@@ -32,7 +32,7 @@ public class Main extends Application{
         pane.setHgap(5);
         pane.setVgap(5);
 
-        textField.setEditable(false);
+        //textField.setEditable(false);
         textField.setAlignment(Pos.CENTER);
         textField.setMinSize(420, 40);
 
@@ -54,22 +54,40 @@ public class Main extends Application{
         Application.launch(args);
     }
 
-    public static void doSomething(String s){
+    //handles the button presses
+    public void doSomething(String s){
 
         if(s.equals("0")||s.equals("1")||s.equals("2")||s.equals("3")||s.equals("4")||s.equals("5")||s.equals("6")||s.equals("7")||
                 s.equals("8")||s.equals("9")){
            nums.add(Integer.parseInt(s));
+            textField.setText(textField.getText()+s);
         }
         else if(s.equals("+")||s.equals("-")||s.equals("/")||s.equals("X")){
-            fullNums.add(retNums(nums));
+            if(nums.size()!=0){
+                fullNums.add(retNums(nums));
+            }
             nums.clear();
+            operations.add(s);
+            textField.setText(textField.getText()+s);
         }
         else if(s.equals("=")){
-
+            fullNums.add(retNums(nums));
+            double temp = calculate(fullNums,operations);
+            textField.setText(Double.toString(temp));
+            nums.clear();
+            fullNums.clear();
+            operations.clear();
+            fullNums.add(temp);
+        }
+        else if(s.equals("CLEAR")){
+            nums.clear();
+            fullNums.clear();
+            operations.clear();
+            textField.clear();
         }
      }
      //combuines all button presses up till operation into one number
-     public static double retNums(ArrayList<Integer> digits){
+     public double retNums(ArrayList<Integer> digits){
         double ret = 0;
         int place = 0;
         for(int i=digits.size()-1; i>=0; i--){
@@ -78,4 +96,24 @@ public class Main extends Application{
         }
         return ret;
      }
+
+     public double calculate(ArrayList<Double> numbers, ArrayList<String> operations){
+         double ret=numbers.get(0);
+         for(int i=0; i<operations.size(); i++){
+             if(operations.get(i).equals("+")){
+                 ret += numbers.get(i+1);
+             }else if(operations.get(i).equals("-")){
+                 ret -= numbers.get(i+1);
+             }else if(operations.get(i).equals("X")){
+                 ret *= numbers.get(i+1);
+             }else if(operations.get(i).equals("/")){
+                 ret /= numbers.get(i+1);
+             }
+         }
+         return ret;
+     }
+
+
+
+
 }
