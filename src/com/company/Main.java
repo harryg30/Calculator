@@ -1,5 +1,6 @@
 package com.company;
 
+import com.sun.xml.internal.bind.v2.TODO;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -65,7 +66,7 @@ public class Main extends Application{
         else if(s.equals("+")||s.equals("-")||s.equals("/")||s.equals("X")){
             if(nums.size()!=0){
                 fullNums.add(retNums(nums));
-            }
+        }
             nums.clear();
             operations.add(s);
             textField.setText(textField.getText()+s);
@@ -85,6 +86,22 @@ public class Main extends Application{
             operations.clear();
             textField.clear();
         }
+        else if(s.equals("DEL")){
+           textField.setText("You can't do that");
+        }
+        else if(s.equals(".")){
+
+            fullNums.add(retNums(nums));
+            nums.clear();
+            operations.add(s);
+            textField.setText(textField.getText()+s);
+        }
+        else if(s.equals("Sqrt")){
+            fullNums.add(retNums(nums));
+            nums.clear();
+            operations.add(s);
+
+        }
      }
      //combuines all button presses up till operation into one number
      public double retNums(ArrayList<Integer> digits){
@@ -97,8 +114,11 @@ public class Main extends Application{
         return ret;
      }
 
+        //returns calculated answer
+        //NEEDS ORDER OF OPERATIONS
      public double calculate(ArrayList<Double> numbers, ArrayList<String> operations){
          double ret=numbers.get(0);
+         makeDecimals(fullNums, operations);
          for(int i=0; i<operations.size(); i++){
              if(operations.get(i).equals("+")){
                  ret += numbers.get(i+1);
@@ -113,6 +133,28 @@ public class Main extends Application{
          return ret;
      }
 
+     //DOESNT WORK RIGHT YET
+     public void makeDecimals(ArrayList<Double> numbers, ArrayList<String> operations){
+         double decimal;
+         double ret;
+         for(int i=0; i<operations.size(); i++){
+             if(operations.get(i).equals(".")) {
+                 decimal = numbers.get(i+1);
+                 while (decimal > 1) {
+                     decimal *= 0.1;
+                 }
+                 decimal+=numbers.get(i);
+                 fullNums.remove(i);
+                 fullNums.remove(i-1);
+                 operations.remove(i);
+                 fullNums.add(i-1, decimal);
+
+
+             }
+         }
+
+
+     }
 
 
 
