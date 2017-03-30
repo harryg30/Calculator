@@ -1,6 +1,8 @@
+
+//to get order of operations loop through looking for * then for / then for + and - evaluateing when the operation is found
+
 package com.company;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -9,9 +11,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Created by ToubeauShawnD on 3/16/2017.
@@ -19,9 +23,13 @@ import java.util.List;
 public class Main extends Application{
 
     private TextField textField = new TextField();
-    private ArrayList<Integer> nums = new ArrayList<Integer>(); //individual button presses
-    private ArrayList<Double> fullNums = new ArrayList<Double>(); //after user input is put together
-    private ArrayList<String> operations = new ArrayList<String>();//operations
+    private ArrayList<Integer> nums = new ArrayList<>(); //individual button presses
+    private ArrayList<Double> fullNums = new ArrayList<>(); //after user input is put together
+    private ArrayList<String> operations = new ArrayList<>();//operations
+
+    private Stack<String> input = new Stack<>();
+    private Stack<String> operationStack = new Stack<>();
+    private Stack<String> operandStack = new Stack<>();
 
     @Override
     public void start(Stage primarystage) throws Exception {
@@ -61,7 +69,7 @@ public class Main extends Application{
         if(s.equals("0")||s.equals("1")||s.equals("2")||s.equals("3")||s.equals("4")||s.equals("5")||s.equals("6")||s.equals("7")||
                 s.equals("8")||s.equals("9")){
            nums.add(Integer.parseInt(s));
-            textField.setText(textField.getText()+s);
+           textField.setText(textField.getText()+s);
         }
         else if(s.equals("+")||s.equals("-")||s.equals("/")||s.equals("X")){
             if(nums.size()!=0){
@@ -69,11 +77,14 @@ public class Main extends Application{
         }
             nums.clear();
             operations.add(s);
+
             textField.setText(textField.getText()+s);
         }
         else if(s.equals("=")){
+
             fullNums.add(retNums(nums));
-            double temp = calculate(fullNums,operations);
+            Exp ans = calculateNew(fullNums,operations);
+            double temp= ans.getNums().get(0);
             textField.setText(Double.toString(temp));
             nums.clear();
             fullNums.clear();
@@ -97,13 +108,13 @@ public class Main extends Application{
             textField.setText(textField.getText()+s);
         }
         else if(s.equals("Sqrt")){
-            fullNums.add(retNums(nums));
+            double x = retNums(nums);
             nums.clear();
-            operations.add(s);
-
+            setTextSqrt(x);
+            fullNums.add(Math.sqrt(x));
         }
      }
-     //combuines all button presses up till operation into one number
+     //combines all button presses up till operation into one number
      public double retNums(ArrayList<Integer> digits){
         double ret = 0;
         int place = 0;
@@ -114,23 +125,30 @@ public class Main extends Application{
         return ret;
      }
 
-        //returns calculated answer
-        //NEEDS ORDER OF OPERATIONS
-     public double calculate(ArrayList<Double> numbers, ArrayList<String> operations){
-         double ret=numbers.get(0);
-         makeDecimals(fullNums, operations);
+        //returns calculated answer as only element in either arraylist
+     public Exp calculateNew(ArrayList<Double> numbers, ArrayList<String> operations){
+         Exp exp = new Exp(numbers, operations);
+         double temp=0;
          for(int i=0; i<operations.size(); i++){
-             if(operations.get(i).equals("+")){
-                 ret += numbers.get(i+1);
-             }else if(operations.get(i).equals("-")){
-                 ret -= numbers.get(i+1);
-             }else if(operations.get(i).equals("X")){
-                 ret *= numbers.get(i+1);
+             if(operations.get(i).equals("X")) {
+                 temp = numbers.get(i) * numbers.get(i + 1);
+                 exp.adjust(temp,i);
              }else if(operations.get(i).equals("/")){
-                 ret /= numbers.get(i+1);
+                 temp = numbers.get(i)*numbers.get(i+1);
+                 exp.adjust(temp,i);
              }
          }
-         return ret;
+         for(int i=0; i<operations.size(); i++){
+             if(operations.get(i).equals("+")){
+                 temp = numbers.get(i)+numbers.get(i+1);
+                 exp.adjust(temp,i);
+             }
+             else if(operations.get(i).equals("-")){
+                 temp = numbers.get(i)-numbers.get(i+1);
+                 exp.adjust(temp,i);
+             }
+         }
+         return exp;
      }
 
      //DOESNT WORK RIGHT YET
@@ -152,10 +170,41 @@ public class Main extends Application{
 
              }
          }
+     }
 
-
+     public void setTextSqrt(double x){
+         System.out.print(x);
+         StringBuilder newDisplay = new StringBuilder(textField.getText());
+         StringBuilder s = new StringBuilder(Double.toString(x));
+         s.delete(s.length()-2,s.length());
+         int i = newDisplay.indexOf(s.toString());
+         newDisplay.insert(i+s.length(),")");
+         newDisplay.insert(i,"Sqrt(");
+         textField.setText(newDisplay.toString());
      }
 
 
 
 }
+/*
+   //NEEDS ORDER OF OPERATIONS
+     public double calculate(ArrayList<Double> numbers, ArrayList<String> operations){
+         double ret=numbers.get(0);
+         //makeDecimals(fullNums, operations);
+         for(int i=0; i<operations.size(); i++) {
+             if (operations.get(i).equals("X")) {
+                 ret *= numbers.get(i + 1);
+             } else if (operations.get(i).equals("/")) {
+                 ret /= numbers.get(i + 1);
+             }
+         }
+         for(int i=0; i<operations.size(); i++) {
+             if (operations.get(i).equals("+")) {
+                 ret += numbers.get(i + 1);
+             } else if (operations.get(i).equals("-")) {
+                 ret -= numbers.get(i + 1);
+             }
+         }
+         return ret;
+     }
+ */
