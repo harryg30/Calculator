@@ -187,6 +187,7 @@ public class Main extends Application{
      }
         //Buggy when deleting operations ; if a number is pressed next it is seprate from the previous number and  display
         // ex. 22+ press del -> 22 press 3 -> 223 press + -> 223+ press = -> 25 ie 22+3
+        //case 3 crashes
      public void del(ArrayList<Double> numbers, ArrayList<String> operations, int lastPress){
          int howMany=0;
          //0-> int button was last
