@@ -26,10 +26,8 @@ public class Main extends Application{
     private ArrayList<Integer> nums = new ArrayList<>(); //individual button presses
     private ArrayList<Double> fullNums = new ArrayList<>(); //after user input is put together
     private ArrayList<String> operations = new ArrayList<>();//operations
-
-    private Stack<String> input = new Stack<>();
-    private Stack<String> operationStack = new Stack<>();
-    private Stack<String> operandStack = new Stack<>();
+    private Exp expression = new Exp();
+    private int lastPress;
 
     @Override
     public void start(Stage primarystage) throws Exception {
@@ -70,26 +68,28 @@ public class Main extends Application{
                 s.equals("8")||s.equals("9")){
            nums.add(Integer.parseInt(s));
            textField.setText(textField.getText()+s);
+           lastPress=0;
         }
-        else if(s.equals("+")||s.equals("-")||s.equals("/")||s.equals("X")){
+        else if(s.equals("+")||s.equals("-")||s.equals("/")||s.equals("X")||s.equals("^")){
             if(nums.size()!=0){
                 fullNums.add(retNums(nums));
         }
             nums.clear();
             operations.add(s);
-
             textField.setText(textField.getText()+s);
+            lastPress=1;
         }
         else if(s.equals("=")){
 
             fullNums.add(retNums(nums));
-            Exp ans = calculateNew(fullNums,operations);
+            Exp ans = calculate(fullNums,operations);
             double temp= ans.getNums().get(0);
             textField.setText(Double.toString(temp));
             nums.clear();
             fullNums.clear();
             operations.clear();
             fullNums.add(temp);
+            lastPress=2;
         }
         else if(s.equals("CLEAR")){
             nums.clear();
@@ -98,7 +98,8 @@ public class Main extends Application{
             textField.clear();
         }
         else if(s.equals("DEL")){
-           textField.setText("You can't do that");
+           del(fullNums, operations,lastPress);
+
         }
         else if(s.equals(".")){
 
@@ -112,6 +113,7 @@ public class Main extends Application{
             nums.clear();
             setTextSqrt(x);
             fullNums.add(Math.sqrt(x));
+            lastPress=3;
         }
      }
      //combines all button presses up till operation into one number
@@ -126,15 +128,13 @@ public class Main extends Application{
      }
 
         //returns calculated answer as only element in either arraylist
-     public Exp calculateNew(ArrayList<Double> numbers, ArrayList<String> operations){
+     public Exp calculate(ArrayList<Double> numbers, ArrayList<String> operations){
          Exp exp = new Exp(numbers, operations);
          double temp=0;
+
          for(int i=0; i<operations.size(); i++){
-             if(operations.get(i).equals("X")) {
-                 temp = numbers.get(i) * numbers.get(i + 1);
-                 exp.adjust(temp,i);
-             }else if(operations.get(i).equals("/")){
-                 temp = numbers.get(i)*numbers.get(i+1);
+             if(operations.get(i).equals("^")) {
+                 temp =Math.pow( numbers.get(i) , numbers.get(i + 1));
                  exp.adjust(temp,i);
              }
          }
@@ -166,8 +166,6 @@ public class Main extends Application{
                  fullNums.remove(i-1);
                  operations.remove(i);
                  fullNums.add(i-1, decimal);
-
-
              }
          }
      }
@@ -182,13 +180,45 @@ public class Main extends Application{
          newDisplay.insert(i,"Sqrt(");
          textField.setText(newDisplay.toString());
      }
-
-
+     public int lastFullNumsLength(){
+        Double lastNum = fullNums.get(fullNums.size()-1);
+        String number = lastNum.toString();
+        return number.length();
+     }
+        //Buggy when deleting operations ; if a number is pressed next it is seprate from the previous number and  display
+        // ex. 22+ press del -> 22 press 3 -> 223 press + -> 223+ press = -> 25 ie 22+3
+     public void del(ArrayList<Double> numbers, ArrayList<String> operations, int lastPress){
+         int howMany=0;
+         //0-> int button was last
+         //1-> operation button
+         //2-> equals button
+         //3-> Sqrt button
+         switch (lastPress){
+             case 0: nums.remove(nums.size()-1);
+                 howMany=1;
+                break;
+             case 1: operations.remove(operations.size()-1);
+                howMany=1;
+                break;
+             case 2: fullNums.remove(fullNums.size()-1);
+                 howMany = lastFullNumsLength();
+                break;
+             case 3: operations.remove(operations.size()-1);
+                howMany = lastFullNumsLength()+6;
+                break;
+         }
+         textField.setText(delText(textField.getText(), howMany));
+     }
+     public String delText(String s, int howMany){
+         StringBuilder str = new StringBuilder(s);
+         str.delete(str.length()-howMany , str.length());
+         return str.toString();
+     }
 
 }
 /*
    //NEEDS ORDER OF OPERATIONS
-     public double calculate(ArrayList<Double> numbers, ArrayList<String> operations){
+     public double calculate(){
          double ret=numbers.get(0);
          //makeDecimals(fullNums, operations);
          for(int i=0; i<operations.size(); i++) {

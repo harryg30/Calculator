@@ -13,6 +13,9 @@ public class Exp {
         this.nums= nums;
         this.ops = ops;
     }
+    public Exp(){
+
+    }
 
     public void setNums(ArrayList<Double> nums){
         this.nums= nums;
