@@ -6,6 +6,7 @@ import java.util.ArrayList;
  * Created by gordensteinh on 3/29/2017.
  */
 public class Exp {
+
     ArrayList<Double> nums= new ArrayList<>();
     ArrayList<String> ops = new ArrayList<>();
 

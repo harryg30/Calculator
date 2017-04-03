@@ -27,7 +27,10 @@ public class Main extends Application{
     private ArrayList<Double> fullNums = new ArrayList<>(); //after user input is put together
     private ArrayList<String> operations = new ArrayList<>();//operations
     private Exp expression = new Exp();
-    private int lastPress;
+    private Stack<Integer> lastPress =new Stack<>();
+
+
+
 
     @Override
     public void start(Stage primarystage) throws Exception {
@@ -68,7 +71,7 @@ public class Main extends Application{
                 s.equals("8")||s.equals("9")){
            nums.add(Integer.parseInt(s));
            textField.setText(textField.getText()+s);
-           lastPress=0;
+           lastPress.add((Integer) 0);
         }
         else if(s.equals("+")||s.equals("-")||s.equals("/")||s.equals("X")||s.equals("^")){
             if(nums.size()!=0){
@@ -77,7 +80,7 @@ public class Main extends Application{
             nums.clear();
             operations.add(s);
             textField.setText(textField.getText()+s);
-            lastPress=1;
+            lastPress.add(1);
         }
         else if(s.equals("=")){
 
@@ -89,13 +92,14 @@ public class Main extends Application{
             fullNums.clear();
             operations.clear();
             fullNums.add(temp);
-            lastPress=2;
+            lastPress.add(2);
         }
         else if(s.equals("CLEAR")){
             nums.clear();
             fullNums.clear();
             operations.clear();
             textField.clear();
+            lastPress.clear();
         }
         else if(s.equals("DEL")){
            del(fullNums, operations,lastPress);
@@ -107,13 +111,14 @@ public class Main extends Application{
             nums.clear();
             operations.add(s);
             textField.setText(textField.getText()+s);
+            lastPress.add(1);
         }
         else if(s.equals("Sqrt")){
             double x = retNums(nums);
             nums.clear();
             setTextSqrt(x);
             fullNums.add(Math.sqrt(x));
-            lastPress=3;
+            lastPress.add(3);
         }
      }
      //combines all button presses up till operation into one number
@@ -133,8 +138,25 @@ public class Main extends Application{
          double temp=0;
 
          for(int i=0; i<operations.size(); i++){
+             if(operations.get(i).equals(".")) {
+                 int k = Double.toString(numbers.get(i+1)).length();
+                 k-=2;
+                 temp =numbers.get(i)+(numbers.get(i+1)/(Math.pow(10,k)));
+                 exp.adjust(temp,i);
+             }
+         }
+         for(int i=0; i<operations.size(); i++){
              if(operations.get(i).equals("^")) {
                  temp =Math.pow( numbers.get(i) , numbers.get(i + 1));
+                 exp.adjust(temp,i);
+             }
+         }
+         for(int i=0; i<operations.size(); i++) {
+             if (operations.get(i).equals("X")) {
+                temp = numbers.get(i)*numbers.get(i + 1);
+                 exp.adjust(temp,i);
+             } else if (operations.get(i).equals("/")) {
+                 temp = numbers.get(i)/numbers.get(i + 1);
                  exp.adjust(temp,i);
              }
          }
@@ -188,34 +210,72 @@ public class Main extends Application{
         //Buggy when deleting operations ; if a number is pressed next it is seprate from the previous number and  display
         // ex. 22+ press del -> 22 press 3 -> 223 press + -> 223+ press = -> 25 ie 22+3
         //case 3 crashes
-     public void del(ArrayList<Double> numbers, ArrayList<String> operations, int lastPress){
+     public void del(ArrayList<Double> numbers, ArrayList<String> operations, Stack<Integer> lastPress){
          int howMany=0;
+         int last = lastPress.pop();
          //0-> int button was last
          //1-> operation button
          //2-> equals button
          //3-> Sqrt button
-         switch (lastPress){
-             case 0: nums.remove(nums.size()-1);
+         //4-> . button
+         //5-> DEL button
+         switch (last){
+             case 0:
+                 if(nums.size()>0){
+                     nums.remove(nums.size()-1);
+                 }
                  howMany=1;
+                 if(!lastPress.empty()) {
+                     last = lastPress.pop();
+                 }
                 break;
              case 1: operations.remove(operations.size()-1);
                 howMany=1;
+                last = lastPress.pop();
+                fixFullNums();
                 break;
              case 2: fullNums.remove(fullNums.size()-1);
                  howMany = lastFullNumsLength();
+                 if(!lastPress.empty()) {
+                     last = lastPress.pop();
+                 }
                 break;
              case 3: operations.remove(operations.size()-1);
                 howMany = lastFullNumsLength()+6;
+                 if(!lastPress.empty()) {
+                     last = lastPress.pop();
+                 }
                 break;
+
+
          }
          textField.setText(delText(textField.getText(), howMany));
+         lastPress.add(last);
      }
      public String delText(String s, int howMany){
          StringBuilder str = new StringBuilder(s);
          str.delete(str.length()-howMany , str.length());
          return str.toString();
      }
+    public void fixFullNums(){
+        Double x =fullNums.get(fullNums.size()-1);
+        String s =x.toString();
+        Double replacement;
+        fullNums.remove(fullNums.size()-1);
 
+        for(int i =0; i<s.length(); i++){
+            if(s.charAt(i)=='.'){
+                //fullNums.add(retNums(nums));
+                //operations.add(".");
+                i=s.length()+1;
+                break;
+            }else {
+                nums.add((int) s.charAt(i) - 48);
+            }
+        }
+        nums.trimToSize();
+        fullNums.trimToSize();
+    }
 }
 /*
    //NEEDS ORDER OF OPERATIONS
