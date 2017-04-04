@@ -34,7 +34,7 @@ public class Main extends Application{
 
     @Override
     public void start(Stage primarystage) throws Exception {
-        List<String> buttons = Arrays.asList("7","8","9","DEL","CLEAR","4","5","6","^","Sqrt","1","2","3","+","-",".","0","=","X","/");
+        List<String> buttons = Arrays.asList("7","8","9","DEL","CLEAR","Sin","4","5","6","^","Sqrt","Cos","1","2","3","+","-","Tan",".","0","=","X","/","Log","!");
 
         FlowPane pane = new FlowPane();
         pane.setAlignment(Pos.CENTER);
@@ -44,7 +44,8 @@ public class Main extends Application{
 
         //textField.setEditable(false);
         textField.setAlignment(Pos.CENTER);
-        textField.setMinSize(420, 40);
+
+        textField.setMinSize(500, 40);
 
         pane.getChildren().add(textField);
 
@@ -55,7 +56,7 @@ public class Main extends Application{
             b.setOnAction(e -> doSomething(b.getText()));
         }
 
-        Scene scene = new Scene(pane,536,500);
+        Scene scene = new Scene(pane,576,500);
         primarystage.setScene(scene);
         primarystage.show();
     }
@@ -113,12 +114,35 @@ public class Main extends Application{
             textField.setText(textField.getText()+s);
             lastPress.add(1);
         }
-        else if(s.equals("Sqrt")){
+        else if(s.equals("Sqrt")||s.equals("Sin")||s.equals("Cos")||s.equals("Tan")||s.equals("Log")){
             double x = retNums(nums);
             nums.clear();
-            setTextSqrt(x);
-            fullNums.add(Math.sqrt(x));
+            if(s.equals("Sqrt")){
+                setTextMono(x,"Sqrt(");
+                fullNums.add(Math.sqrt(x));
+            }else if(s.equals("Sin")){
+                setTextMono(x,"Sin(");
+                fullNums.add(Math.sin(x));
+            }else if(s.equals("Cos")){
+                setTextMono(x,"Cos(");
+                fullNums.add(Math.cos(x));
+            }else if(s.equals("Tan")){
+                setTextMono(x,"Tan(");
+                fullNums.add(Math.tan(x));
+            }else if(s.equals("Log")){
+                setTextMono(x,"Log(");
+                fullNums.add(Math.log(x));
+            }else{
+                fullNums.add(x);
+            }
+
             lastPress.add(3);
+        }else if(s.equals("!")){
+            double x = retNums(nums);
+            nums.clear();
+            lastPress.add(3);
+            textField.setText(textField.getText()+s);
+            fullNums.add(factorial(x));
         }
      }
      //combines all button presses up till operation into one number
@@ -173,6 +197,15 @@ public class Main extends Application{
          return exp;
      }
 
+     public double factorial(double x){
+         if(x==1){
+             return 1;
+         }
+         else{
+             return x*factorial(x-1);
+         }
+     }
+
      //DOESNT WORK RIGHT YET
      public void makeDecimals(ArrayList<Double> numbers, ArrayList<String> operations){
          double decimal;
@@ -192,14 +225,14 @@ public class Main extends Application{
          }
      }
 
-     public void setTextSqrt(double x){
+     public void setTextMono(double x, String str){
          System.out.print(x);
          StringBuilder newDisplay = new StringBuilder(textField.getText());
          StringBuilder s = new StringBuilder(Double.toString(x));
          s.delete(s.length()-2,s.length());
          int i = newDisplay.indexOf(s.toString());
          newDisplay.insert(i+s.length(),")");
-         newDisplay.insert(i,"Sqrt(");
+         newDisplay.insert(i,str);
          textField.setText(newDisplay.toString());
      }
      public int lastFullNumsLength(){
@@ -216,7 +249,7 @@ public class Main extends Application{
          //0-> int button was last
          //1-> operation button
          //2-> equals button
-         //3-> Sqrt button
+         //3-> Mono parameter operation button
          //4-> . button
          //5-> DEL button
          switch (last){
@@ -277,25 +310,3 @@ public class Main extends Application{
         fullNums.trimToSize();
     }
 }
-/*
-   //NEEDS ORDER OF OPERATIONS
-     public double calculate(){
-         double ret=numbers.get(0);
-         //makeDecimals(fullNums, operations);
-         for(int i=0; i<operations.size(); i++) {
-             if (operations.get(i).equals("X")) {
-                 ret *= numbers.get(i + 1);
-             } else if (operations.get(i).equals("/")) {
-                 ret /= numbers.get(i + 1);
-             }
-         }
-         for(int i=0; i<operations.size(); i++) {
-             if (operations.get(i).equals("+")) {
-                 ret += numbers.get(i + 1);
-             } else if (operations.get(i).equals("-")) {
-                 ret -= numbers.get(i + 1);
-             }
-         }
-         return ret;
-     }
- */
